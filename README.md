@@ -1,0 +1,1 @@
+# A discord bot that can create Splitwise expenses
