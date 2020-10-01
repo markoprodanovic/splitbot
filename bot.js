@@ -50,26 +50,32 @@ function split(msg, args) {
 
     const group_id = process.env.SPLITWISE_GROUP_ID
 
+    const splitList = splitExpense(splitSpec.expense, splitSpec.splitWith.length + 1);
+
+    // pop off the first element as the requesters contribution
+    requesterShare = splitList.pop();
 
 
     users = splitSpec.splitWith.map(name => {
         return {
             user_id: lookupId(name),
-            owed_share: String(Math.floor(splitSpec.amountOwed / splitSpec.splitWith.length)),
+            owed_share: String(splitList.pop()),
             paid_share: '0.00'
         }
     })
 
     users.push({
         user_id: requester.id,
-        owed_share: '0.00',
-        paid_share: String(splitSpec.amountOwed)
+        owed_share: String(requesterShare),
+        paid_share: String(splitSpec.expense)
     })
+
+    console.log(users)
 
 
     sw.createExpense({
         users: users,
-        cost: splitSpec.amountOwed,
+        cost: splitSpec.expense,
         description: `Requested by ${requester.name} from the discord chat`,
         payment: false,
         split_equally: true,
@@ -79,19 +85,51 @@ function split(msg, args) {
     )
 }
 
+function splitExpense(expense, numPeople) {
+    let initialAmount = Math.floor((expense / numPeople) * 100) / 100;
+
+    res = []
+
+    for (let i = 0; i < numPeople; i++) {
+        res.push(initialAmount)
+    }
+
+    remainder = expense - (initialAmount * numPeople);
+
+    remainder = remainder.toFixed(2)
+
+    console.log(remainder)
+
+    let j = 0
+    while (remainder > 0) {
+        res[j] += 0.01;
+        remainder -= 0.01;
+        j = (j + 1) % res.length;
+    }
+
+    return res
+}
+
+function financial(x) {
+    return Number.parseFloat(x).toFixed(2);
+}
+
+
 function lookupId(name) {
     return Object.values(userTable).filter(user => user.name.toLowerCase() == name)[0].id
 }
 
 function parseSplitCommand(requester, args) {
 
-    const users = ['marko', 'hiro', 'seung-jin']
+    const possibleUsers = ['marko', 'hiro', 'seung-jin']
 
     args = args.map(name => name == 'luke' ? 'seung-jin' : name)
 
+    const splitWith = args.slice(2).map(name => name.toLowerCase())
+
     // must have 4 or 5 arguments to be valid
     if (args.length < 3 || args.length > 4) {
-        throw Error('⚠️ Must have between 4 and 5 arguments: ex. "!split $30 hiro marko luke"')
+        throw Error('⚠️ Must have between 4 and 5 arguments: ex. "!split 30 hiro luke"')
     }
 
     let expense_amount = args[1];
@@ -103,14 +141,20 @@ function parseSplitCommand(requester, args) {
         throw Error('⚠️ Please provide amount in CAD as second argument (max 2 decimals)')
     }
 
-    if (!users.includes(args[2]) || (args.length == 4 && !users.includes(args[3]))) {
-        throw Error('⚠️ Last arguments need to be names of swamp legends to split money with - can be: [Hiro, Marko, Luke]')
+    splitWith.forEach(person => {
+        if (!possibleUsers.includes(person)) {
+            throw Error('⚠️ The people you split with must be swamp legends - possible values: [hiro, marko, luke]')
+        }
+    })
+
+    if (splitWith.includes(requester.name.toLowerCase())) {
+        throw Error('⚠️ Your name cannot be in the list of people to split with')
     }
 
     return {
         requester: requester,
-        amountOwed: Number(expense_amount),
-        splitWith: args.slice(2)
+        expense: Number(expense_amount),
+        splitWith: splitWith
     }
 }
 
