@@ -1,3 +1,1 @@
-# Get Started!
-
-Add files and start typing 🎉
+# A discord bot that can create Splitwise expenses
