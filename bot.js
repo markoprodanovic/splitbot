@@ -7,15 +7,18 @@ require('dotenv').config();
 const userTable = {
     'marko___': {
         name: 'Marko',
-        id: '17012877'
+        id: '17012877',
+        emoji: '<:sexy:761021985765457940>'
     },
     'misterbiscuit': {
         name: 'Seung-Jin',
-        id: '35562250'
+        id: '35562250',
+        emoji: '<:chillin:761018980461838376>'
     },
     'heromoo': {
         name: 'Hiro',
-        id: '18070776'
+        id: '18070776',
+        emoji: '<:swed:761018492350234624>'
     }
 }
 
@@ -53,10 +56,10 @@ function split(msg, args) {
     const splitList = splitExpense(splitSpec.expense, splitSpec.splitWith.length + 1);
 
     // pop off the first element as the requesters contribution
-    requesterShare = splitList.pop();
+    let requesterShare = splitList.pop();
 
 
-    users = splitSpec.splitWith.map(name => {
+    let users = splitSpec.splitWith.map(name => {
         return {
             user_id: lookupId(name),
             owed_share: String(splitList.pop()),
@@ -81,20 +84,33 @@ function split(msg, args) {
         split_equally: true,
         group_id: group_id,
     }).then(
-        msg.reply('💰 The expense was recorded on Splitwise... go swed 🌱)')
-    )
+        msg.reply(`💸 Expense of $${splitSpec.expense} CAD was recorded on Splitwise`)
+    ).then(() => {
+        let emojiList = users.map(user => {
+            const id = user.user_id;
+            return lookupEmoji(id);
+        })
+        return emojiList
+    }).then(emojis => {
+        let emojiString = emojis.join(' ')
+        msg.reply(`💰 Split between: ${emojiString}`)
+    })
+}
+
+function lookupEmoji(id) {
+    return Object.values(userTable).filter(user => user.id == id)[0].emoji
 }
 
 function splitExpense(expense, numPeople) {
     let initialAmount = Math.floor((expense / numPeople) * 100) / 100;
 
-    res = []
+    let res = []
 
     for (let i = 0; i < numPeople; i++) {
         res.push(initialAmount)
     }
 
-    remainder = expense - (initialAmount * numPeople);
+    let remainder = expense - (initialAmount * numPeople);
 
     remainder = remainder.toFixed(2)
 
@@ -122,8 +138,8 @@ function lookupId(name) {
 function parseSplitCommand(requester, args) {
 
     const possibleUsers = ['marko', 'hiro', 'seung-jin']
-
-    args = args.map(name => name == 'luke' ? 'seung-jin' : name)
+    
+    args = args.map(name => (name == 'luke' || name == 'Luke') ? 'seung-jin' : name)
 
     const splitWith = args.slice(2).map(name => name.toLowerCase())
 
