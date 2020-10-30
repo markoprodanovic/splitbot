@@ -8,17 +8,17 @@ const userTable = {
     'marko___': {
         name: 'Marko',
         id: '17012877',
-        emoji: '<:sexy:761021985765457940>'
+        emoji: '<:761021985765457940>'
     },
     'misterbiscuit': {
         name: 'Seung-Jin',
         id: '35562250',
-        emoji: '<:chillin:761018980461838376>'
+        emoji: '<:761018980461838376>'
     },
     'heromoo': {
         name: 'Hiro',
         id: '18070776',
-        emoji: '<:swed:761018492350234624>'
+        emoji: '<:761018492350234624>'
     }
 }
 
@@ -159,7 +159,7 @@ function parseSplitCommand(requester, args) {
 
     splitWith.forEach(person => {
         if (!possibleUsers.includes(person)) {
-            throw Error('⚠️ The people you split with must be swamp legends - possible values: [hiro, marko, luke]')
+            throw Error('⚠️ The people you split with must be members of the group - possible values: [hiro, marko, luke]')
         }
     })
 
