@@ -13,8 +13,8 @@ A discord bot that can create expenses on [Splitwise](https://www.splitwise.com/
 
 ### Usage examples
 
-**!split 30 hiro luke**: would charge myself, Hiro and Luke $10 each on Splitwise
-**!split 10.50 luke**: would charge me and Luke $5.25 each
+- **!split 30 hiro luke**: would charge myself, Hiro and Luke \$10 each on Splitwise
+- **!split 10.50 luke**: would charge me and Luke \$5.25 each
 
 ## `.env`
 
